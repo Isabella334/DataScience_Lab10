@@ -55,7 +55,7 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
         if desglose == "total":
             color = paleta.PRIMARIO
         elif cat == "Otros":
-            color = paleta.TEXTO_SUAVE
+            color = paleta.OTROS
         else:
             color = paleta.color_para(desglose, cat, i)
         apilada = vista == "Composición (área apilada)"
@@ -81,7 +81,7 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
         nivel_2019 = serie.loc[serie["fecha"].dt.year == 2019, "viajeros"].sum()
         if nivel_2019:
             fig.add_hline(
-                y=nivel_2019, line_dash="dash", line_color=paleta.SECUNDARIO, line_width=1.5,
+                y=nivel_2019, line_dash="dash", line_color=paleta.REFERENCIA, line_width=1.5,
                 annotation_text="Nivel 2019 (prepandemia)", annotation_position="bottom left",
                 annotation_font=dict(size=11, color=paleta.TEXTO_SUAVE),
             )

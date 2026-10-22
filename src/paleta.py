@@ -1,53 +1,80 @@
 """
 Paleta de colores del tablero (fuente única de verdad).
 
-PROVISIONAL: basada en Okabe-Ito (segura para daltonismo) mientras la Persona 2
-entrega los códigos hex definitivos. Para cambiarla, editar SOLO este archivo
-(y los colores base de .streamlit/config.toml).
+Paleta base definida por la Persona 2 (Coolors):
+    Ghost White  #FEF9FF   fondo
+    Graphite     #2E2F2F   texto y datos observados
+    Sky Aqua     #56CBF9   acento frío: predicciones, vía aérea
+    Honey Bronze #EDB458   acento cálido suave: referencias (p. ej. nivel 2019)
+    Amber Earth  #E8871E   acento cálido fuerte: selección / resaltado
+
+Azul vs. naranja es el par de contraste más seguro para daltonismo (protanopia y
+deuteranopia los siguen distinguiendo). Los dos tonos cálidos se diferencian por
+luminosidad, no solo por tono.
+
+Sky Aqua sobre el fondo claro tiene poco contraste (~1.8:1), así que para textos y
+líneas finas se usa un tono oscuro del mismo matiz (AQUA_OSCURO, 5.3:1, cumple WCAG AA). Los tonos
+derivados son variaciones de luminosidad de los 5 colores base, no colores nuevos.
 
 Regla de significado: cada categoría conserva su color en TODAS las gráficas.
+Para cambiar la paleta, editar SOLO este archivo y .streamlit/config.toml.
 """
 
+# Colores base (Persona 2)
+GHOST_WHITE = "#FEF9FF"
+GRAPHITE = "#2E2F2F"
+SKY_AQUA = "#56CBF9"
+HONEY_BRONZE = "#EDB458"
+AMBER_EARTH = "#E8871E"
+
+# Tonos derivados (misma tonalidad, distinta luminosidad)
+AQUA_OSCURO = "#1B6F98"
+AQUA_CLARO = "#B9E9FC"
+AMBER_OSCURO = "#9A5A12"
+GRIS_MEDIO = "#6B6D6D"
+GRIS_CLARO = "#C4C5C5"
+
 # Colores de interfaz
-PRIMARIO = "#0B5C8A"      # acento principal: títulos, serie total, botones
-SECUNDARIO = "#E69F00"    # resaltado / selección del usuario
-FONDO = "#FFFFFF"
-FONDO_SUAVE = "#F3F6F9"
-TEXTO = "#1F2933"
-TEXTO_SUAVE = "#5F6B7A"
-REJILLA = "#E3E8EE"
+PRIMARIO = AQUA_OSCURO      # títulos, cifras clave, serie total
+SECUNDARIO = AMBER_EARTH    # resaltado / selección del usuario
+REFERENCIA = HONEY_BRONZE   # líneas de referencia (nivel 2019, metas)
+FONDO = GHOST_WHITE
+FONDO_SUAVE = "#F3EEF4"     # tarjetas y barra lateral (Ghost White un poco más oscuro)
+TEXTO = GRAPHITE
+TEXTO_SUAVE = GRIS_MEDIO
+REJILLA = "#ECE7ED"
 
 # Semántica fija para modelos (observado vs. estimado)
-OBSERVADO = "#1F2933"
-PREDICCION = "#0072B2"
-INTERVALO = "rgba(0, 114, 178, 0.15)"
+OBSERVADO = GRAPHITE
+PREDICCION = AQUA_OSCURO
+INTERVALO = "rgba(86, 203, 249, 0.25)"  # Sky Aqua translúcido
+OTROS = GRIS_CLARO
 
-# Categorías: Okabe-Ito + grises para lo residual
-_CATEGORICA = ["#0072B2", "#E69F00", "#009E73", "#CC79A7", "#56B4E9", "#D55E00", "#F0E442", "#000000"]
+_CATEGORICA = [AQUA_OSCURO, AMBER_EARTH, SKY_AQUA, HONEY_BRONZE, GRAPHITE, AMBER_OSCURO, AQUA_CLARO, GRIS_MEDIO]
 
 COLOR_VIA = {
-    "Aérea": "#0072B2",
-    "Terrestre": "#009E73",
-    "Marítima": "#56B4E9",
+    "Aérea": AQUA_OSCURO,
+    "Terrestre": AMBER_EARTH,
+    "Marítima": SKY_AQUA,
 }
 
 COLOR_REGION = {
-    "América Del Centro": "#0072B2",
-    "América Del Norte": "#E69F00",
-    "Europa": "#009E73",
-    "América Del Sur y el Caribe": "#CC79A7",
-    "Asia": "#D55E00",
-    "Cruceros": "#56B4E9",
-    "Oceanía": "#F0E442",
-    "Oriente Medio": "#8C6D31",
-    "Otros Países Del Mundo": "#9AA5B1",
+    "América Del Centro": AQUA_OSCURO,
+    "América Del Norte": AMBER_EARTH,
+    "Europa": SKY_AQUA,
+    "América Del Sur y el Caribe": HONEY_BRONZE,
+    "Asia": GRAPHITE,
+    "Cruceros": AQUA_CLARO,
+    "Oceanía": AMBER_OSCURO,
+    "Oriente Medio": GRIS_MEDIO,
+    "Otros Países Del Mundo": GRIS_CLARO,
 }
 
 COLOR_TIPO_VIAJERO = {
-    "Turista": "#0072B2",
-    "Excursionista": "#E69F00",
-    "Cruceristas": "#56B4E9",
-    "Viajero": "#9AA5B1",
+    "Turista": AQUA_OSCURO,
+    "Excursionista": AMBER_EARTH,
+    "Cruceristas": SKY_AQUA,
+    "Viajero": GRIS_CLARO,
 }
 
 MAPAS_COLOR = {
