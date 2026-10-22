@@ -1,9 +1,3 @@
-"""
-Observatorio de Turismo Sostenible – Guatemala
-Tablero interactivo para directivos del sector turístico (CC3066 · Lab 10).
-
-Ejecutar:  streamlit run app.py
-"""
 import streamlit as st
 
 from src import paleta
@@ -31,7 +25,7 @@ st.markdown(
 
 df = cargar_datos()
 
-# ---------------------------------------------------------------- Barra lateral
+# Barra lateral
 with st.sidebar:
     st.header("Filtros generales")
     st.caption("Se aplican a todas las gráficas del tablero.")
@@ -56,7 +50,7 @@ with st.sidebar:
 
 datos = aplicar_filtros(df, filtros)
 
-# ---------------------------------------------------------------- Encabezado
+# Encabezado
 st.title("Observatorio de Turismo Sostenible · Guatemala")
 st.markdown(
     "Explore cómo llegan los viajeros internacionales al país, de dónde vienen y qué "
@@ -68,7 +62,7 @@ k2.metric("Países de residencia", f"{datos['pais'].nunique():,}")
 k3.metric("Puntos de ingreso", f"{datos['frontera'].nunique():,}")
 k4.metric("Último mes con datos", f"{df['fecha'].max():%b %Y}")
 
-# ---------------------------------------------------------------- Navegación
+# Navegación
 # Pestañas alineadas con las preguntas de gestión (P1–P6) del documento de alcance
 tab_explorar, tab_origen, tab_modelos, tab_acerca = st.tabs(
     ["📈 Evolución y origen", "🛂 Vías, temporada y tipo de visitante", "🔮 Predicciones y modelos",
