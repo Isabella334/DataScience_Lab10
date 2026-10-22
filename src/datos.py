@@ -7,6 +7,9 @@ import streamlit as st
 RAIZ = Path(__file__).resolve().parent.parent
 PARQUET = RAIZ / "data" / "processed" / "viajeros.parquet"
 
+# Visitantes comparables en toda la serie ("Viajero" cambia de definición en 2023)
+VISITANTES = ("Turista", "Excursionista")
+
 # Etiquetas legibles para el usuario (nombre de columna -> texto en la interfaz)
 ETIQUETAS = {
     "total": "Total",

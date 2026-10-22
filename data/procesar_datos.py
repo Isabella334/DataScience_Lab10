@@ -1,7 +1,7 @@
 """
-Limpieza base del dataset de ingreso de viajeros (Labs 1 y 2).
+Limpieza base del dataset de ingreso de viajeros (Lab 1).
 
-Lee el Excel original y genera data/processed/viajeros.parquet con nombres de
+Lee el Excel original del Lab 1 y genera data/processed/viajeros.parquet con nombres de
 columna sin tildes ni espacios. La Persona 4 puede ampliar esta limpieza; la app
 solo depende de las columnas listadas en COLUMNAS.
 
@@ -35,11 +35,11 @@ COLUMNAS = {
 def procesar() -> pd.DataFrame:
     df = pd.read_excel(ORIGEN, sheet_name="Datos").rename(columns=COLUMNAS)
 
-    # Regiones: unificar cruceros y marcar los registros sin región
+    # Regiones: unificar cruceros y reclasificar la región "0" como "Otros" (igual que en el EDA del Lab 1)
     df["region"] = (
         df["region"].astype(str).str.strip()
-        .replace({"Cruceristas": "Cruceros", "0": "Sin dato"})
         .str.replace("Paises", "Países")
+        .replace({"Cruceristas": "Cruceros", "0": "Otros Países Del Mundo"})
     )
     df["frontera"] = df["frontera"].astype(str).str.replace(r"^\d+\s+", "", regex=True)
     df["fecha"] = pd.to_datetime(dict(year=df["anio"], month=df["mes"], day=1))

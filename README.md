@@ -1,7 +1,7 @@
 # Observatorio de Turismo Sostenible · Guatemala
 
 Tablero interactivo para directivos del sector turístico (CC3066 Data Science · Lab 10, UVG 2026).
-Reutiliza los datos y modelos de los Laboratorios 1 y 2 (ingreso de viajeros internacionales 2009 – jun 2026).
+Reutiliza los datos y modelos del Laboratorio 1 (ingreso de viajeros internacionales 2009 – jun 2026).
 
 ## Cómo ejecutarlo
 
@@ -17,7 +17,7 @@ streamlit run app.py
 app.py                     # punto de entrada: layout, filtros globales y pestañas
 .streamlit/config.toml     # tema base (colores sincronizados con src/paleta.py)
 data/
-  raw/                     # Excel original de los Labs 1 y 2
+  raw/                     # Excel original del Lab 1
   processed/               # viajeros.parquet (datos limpios que usa la app)
   procesar_datos.py        # limpieza: Excel -> parquet
 src/
@@ -44,7 +44,7 @@ docs/                      # documento de diseño y material del avance
 
 | Criterio | Streamlit | Dash | Shiny (R) |
 |---|---|---|---|
-| Lenguaje de los Labs 1 y 2 (Python, pandas, statsmodels, Prophet, Keras) | ✅ mismo stack, se reutiliza código y resultados directamente | ✅ | ❌ habría que portar todo a R |
+| Lenguaje del Lab 1 (Python, pandas, statsmodels, Prophet) | ✅ mismo stack, se reutiliza código y resultados directamente | ✅ | ❌ habría que portar todo a R |
 | Tiempo de desarrollo (avance en 1 día, final en 3) | ✅ muy rápido: un script, sin HTML/CSS ni callbacks | ⚠️ más código (layout + callbacks explícitos) | ⚠️ |
 | Gráficas enlazadas (clic/arrastre en una filtra otra) | ✅ `st.plotly_chart(on_select=...)` + `session_state` | ✅ callbacks | ✅ |
 | Aumentar/disminuir detalle | ✅ controles nativos + zoom/rangeslider de Plotly | ✅ | ✅ |
@@ -52,8 +52,8 @@ docs/                      # documento de diseño y material del avance
 | Despliegue gratuito | ✅ Streamlit Community Cloud desde GitHub | ⚠️ requiere servidor propio (Render, etc.) | ⚠️ shinyapps.io con límite de horas |
 | Código abierto y gratuito | ✅ Apache 2.0 | ✅ MIT | ✅ GPL |
 
-**Conclusión.** Streamlit es la opción más adecuada porque: (1) todo el trabajo previo (limpieza,
-modelos ARIMA/SARIMA, Holt-Winters, Prophet y LSTM) está en Python, así que las predicciones y métricas
+**Conclusión.** Streamlit es la opción más adecuada porque: (1) todo el trabajo del Lab 1 (limpieza,
+modelos SARIMA, Holt-Winters, Prophet, SES y Seasonal Naive) está en Python, así que las predicciones y métricas
 se muestran sin reescribir nada; (2) permite construir rápido una interfaz limpia con pestañas, filtros
 laterales y tarjetas, adecuada para directivos sin formación estadística; (3) con Plotly obtenemos
 interactividad rica (tooltips, zoom, selección por arrastre) y, con `on_select`, gráficas enlazadas;

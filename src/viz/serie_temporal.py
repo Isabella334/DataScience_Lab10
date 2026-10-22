@@ -66,7 +66,7 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
             marker=dict(size=6),
             stackgroup="uno" if apilada else None,
             fillcolor=color if apilada else None,
-            hovertemplate=f"<b>{cat}</b><br>%{{x|{formato_fecha}}}<br>%{{y:,.0f}} viajeros<extra></extra>",
+            hovertemplate=f"<b>{cat}</b><br>%{{x|{formato_fecha}}}<br>%{{y:,.0f}} visitantes<extra></extra>",
         ))
 
     # Marcar el periodo de la pandemia como contexto (hecho observado, sin atribuir causas)
@@ -76,6 +76,16 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
         annotation_text="Cierre de fronteras / COVID-19", annotation_position="top left",
         annotation_font=dict(size=11, color=paleta.TEXTO_SUAVE),
     )
+    # Referencia prepandemia (P1): nivel de 2019 en la vista anual del total
+    if frecuencia == "Año" and desglose == "total":
+        nivel_2019 = serie.loc[serie["fecha"].dt.year == 2019, "viajeros"].sum()
+        if nivel_2019:
+            fig.add_hline(
+                y=nivel_2019, line_dash="dash", line_color=paleta.SECUNDARIO, line_width=1.5,
+                annotation_text="Nivel 2019 (prepandemia)", annotation_position="bottom left",
+                annotation_font=dict(size=11, color=paleta.TEXTO_SUAVE),
+            )
+
     # El último año/trimestre puede estar incompleto (la base llega a jun 2026)
     ultimo = serie["fecha"].max()
     if frecuencia != "Mes":
@@ -93,7 +103,7 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
         font=dict(color=paleta.TEXTO, size=13),
         dragmode="select",
         xaxis=dict(title=None, gridcolor=paleta.REJILLA, rangeslider=dict(visible=True, thickness=0.06)),
-        yaxis=dict(title="Viajeros", gridcolor=paleta.REJILLA, tickformat=",.0f", rangemode="tozero"),
+        yaxis=dict(title="Visitantes", gridcolor=paleta.REJILLA, tickformat=",.0f", rangemode="tozero"),
     )
     return fig
 
@@ -117,9 +127,9 @@ def _leer_seleccion(evento, frecuencia: str):
 
 
 def render(df: pd.DataFrame) -> None:
-    st.subheader("1. ¿Cómo ha evolucionado la llegada de viajeros?")
+    st.subheader("1. ¿Cómo ha evolucionado la llegada de visitantes y cuánto nos hemos recuperado respecto a 2019?")
     st.caption(
-        "Cantidad de viajeros internacionales que ingresaron a Guatemala en cada periodo. "
+        "Cantidad de visitantes internacionales que ingresaron a Guatemala en cada periodo. "
         "Cambie el nivel de detalle o el desglose, y **arrastre sobre la gráfica (o haga clic en un punto)** "
         "para seleccionar un periodo: las demás gráficas se actualizarán con esa selección."
     )
@@ -161,10 +171,17 @@ def render(df: pd.DataFrame) -> None:
 
     total_total = sub["viajeros"].sum()
     k1, k2, k3 = st.columns(3)
-    k1.metric("Viajeros en el periodo", formato_num(total_total))
+    k1.metric("Visitantes en el periodo", formato_num(total_total))
     meses = sub["fecha"].nunique()
     k2.metric("Promedio mensual", formato_num(total_total / meses) if meses else "—")
     if desglose != "total" and not sub.empty:
         lider = sub.groupby(desglose, observed=True)["viajeros"].sum().idxmax()
-        k3.metric(f"{ETIQUETAS[desglose]} con más viajeros", str(lider))
+        k3.metric(f"{ETIQUETAS[desglose]} con más visitantes", str(lider))
+    else:
+        anual = df.groupby("anio")["viajeros"].sum()
+        if anual.get(2019) and anual.get(2025):
+            k3.metric(
+                "Recuperación 2025 vs. 2019", f"{anual[2025] / anual[2019]:.0%}",
+                help="Visitantes de 2025 como porcentaje de los de 2019 (último año completo antes de la pandemia).",
+            )
     st.caption(f"🔎 {etiqueta}. " + ("Haga doble clic en la gráfica para quitar la selección." if seleccion else ""))

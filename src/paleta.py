@@ -41,7 +41,6 @@ COLOR_REGION = {
     "Oceanía": "#F0E442",
     "Oriente Medio": "#8C6D31",
     "Otros Países Del Mundo": "#9AA5B1",
-    "Sin dato": "#CBD2D9",
 }
 
 COLOR_TIPO_VIAJERO = {

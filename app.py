@@ -7,7 +7,7 @@ Ejecutar:  streamlit run app.py
 import streamlit as st
 
 from src import paleta
-from src.datos import aplicar_filtros, cargar_datos, formato_num
+from src.datos import VISITANTES, aplicar_filtros, cargar_datos, formato_num
 from src.viz import serie_temporal, viz2
 
 st.set_page_config(
@@ -41,13 +41,17 @@ with st.sidebar:
         "region": st.multiselect("Región de residencia", sorted(df["region"].cat.categories),
                                  placeholder="Todas"),
         "via": st.multiselect("Vía de ingreso", sorted(df["via"].cat.categories), placeholder="Todas"),
-        "tipo_viajero": st.multiselect("Tipo de viajero", sorted(df["tipo_viajero"].cat.categories),
-                                       placeholder="Todos"),
+        "tipo_viajero": st.multiselect(
+            "Tipo de viajero", sorted(df["tipo_viajero"].cat.categories),
+            default=list(VISITANTES), placeholder="Todos",
+            help="Por defecto se muestran solo visitantes (Turista + Excursionista). "
+                 "La categoría «Viajero» cambió de definición en 2023, así que no es comparable en el tiempo.",
+        ),
     }
     st.divider()
     st.caption(
         "Fuente: registros de ingreso de viajeros internacionales 2009 – jun 2026 "
-        "(IGM / INGUAT). Uso exclusivamente académico; no son cifras oficiales."
+        "(IGM / INGUAT), base del Lab 1. Uso exclusivamente académico; no son cifras oficiales."
     )
 
 datos = aplicar_filtros(df, filtros)
@@ -59,28 +63,30 @@ st.markdown(
     "esperan los modelos de predicción para los próximos meses."
 )
 k1, k2, k3, k4 = st.columns(4)
-k1.metric("Viajeros (filtro actual)", formato_num(datos["viajeros"].sum()))
+k1.metric("Visitantes (filtro actual)", formato_num(datos["viajeros"].sum()))
 k2.metric("Países de residencia", f"{datos['pais'].nunique():,}")
 k3.metric("Puntos de ingreso", f"{datos['frontera'].nunique():,}")
 k4.metric("Último mes con datos", f"{df['fecha'].max():%b %Y}")
 
 # ---------------------------------------------------------------- Navegación
+# Pestañas alineadas con las preguntas de gestión (P1–P6) del documento de alcance
 tab_explorar, tab_origen, tab_modelos, tab_acerca = st.tabs(
-    ["📈 Evolución y temporada", "🌎 Origen y vías de ingreso", "🔮 Predicciones y modelos", "ℹ️ Acerca del tablero"]
+    ["📈 Evolución y origen", "🛂 Vías, temporada y tipo de visitante", "🔮 Predicciones y modelos",
+     "ℹ️ Acerca del tablero"]
 )
 
 with tab_explorar:
-    serie_temporal.render(datos)
+    serie_temporal.render(datos)  # P1
     st.divider()
-    viz2.render(datos)
+    viz2.render(datos)  # P2
 
 with tab_origen:
-    st.info("Sección en construcción: mapa / ranking de países y puntos de ingreso.")
+    st.info("Sección en construcción: vías y fronteras (P3), estacionalidad (P4) y tipo de visitante (P5).")
 
 with tab_modelos:
     st.info(
-        "Sección en construcción: comparación de los modelos de los Labs 1 y 2 "
-        "(ARIMA/SARIMA, Holt-Winters, Prophet, LSTM) con sus métricas MAE y RMSE."
+        "Sección en construcción (P6): pronóstico vs. valor real y comparación de error (MAE/RMSE) "
+        "de los modelos del Lab 1: Prophet, SARIMA, Holt-Winters, SES y Seasonal Naive."
     )
 
 with tab_acerca:
