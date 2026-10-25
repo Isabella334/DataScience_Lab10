@@ -5,43 +5,71 @@ Reutiliza los datos y modelos del Laboratorio 1 (ingreso de viajeros internacion
 
 ## Cómo ejecutarlo
 
+Se necesita Python 3.10 o superior. Desde la carpeta del repositorio:
+
 ```bash
-pip install -r requirements.txt
-python data/procesar_datos.py   # opcional: la app lo genera sola si falta el parquet
+python3 -m venv .venv            # solo la primera vez
+source .venv/bin/activate        # en Windows: .venv\Scripts\activate
+pip install -r requirements.txt  # solo la primera vez o si cambia requirements.txt
 streamlit run app.py
 ```
+
+La app se abre en http://localhost:8501. Si falta `data/processed/viajeros.parquet`, la app lo genera
+sola desde el Excel (o se puede generar con `python data/procesar_datos.py`).
 
 ## Estructura
 
 ```
-app.py                     # punto de entrada: layout, filtros globales y pestañas
-.streamlit/config.toml     # tema base (colores sincronizados con src/paleta.py)
+app.py                     # punto de entrada: navegación, barra lateral, indicadores y Metodología
+.streamlit/config.toml     # tema (colores sincronizados con src/paleta.py y fuente Inter)
 data/
   raw/                     # Excel original del Lab 1
-  processed/               # viajeros.parquet (datos limpios que usa la app)
+  processed/               # viajeros.parquet (+ predicciones.parquet y metricas.parquet de los modelos)
   procesar_datos.py        # limpieza: Excel -> parquet
 src/
-  paleta.py                # colores del tablero y su significado
-  datos.py                 # carga en caché, filtros globales, formato de números
+  paleta.py                # ÚNICA fuente de colores del tablero y su significado
+  datos.py                 # carga en caché, filtros, constantes de series y modelos, formato
   pestanas/
     ingreso.py             # pestaña Ingreso: indicadores y distribución de sus gráficas
-  viz/
+  viz/                     # un archivo por gráfica (ver tabla abajo)
     serie_temporal.py      # evolución de visitantes (P1)
-    viz2.py                # mercados de origen (P2)
     vias_fronteras.py      # vías de ingreso y ranking de fronteras, enlazadas (P3)
     estacionalidad.py      # mapa de calor año × mes (P4)
 ```
 
 ### Convenciones del código
 
-- **Cada visualización es un módulo en `src/viz/`** con una función `render(df)`; `app.py` solo la llama
-  dentro de la pestaña correspondiente.
+- **Cada visualización es un módulo en `src/viz/`** con una función `render(df)`. `app.py` ya tiene
+  registradas las gráficas; si un archivo todavía no existe, la pestaña muestra "Esta gráfica estará
+  disponible próximamente". Al crear el archivo, la gráfica aparece sola. No hace falta editar `app.py`.
+
+  | Pestaña | Archivo en `src/viz/` |
+  |---|---|
+  | Panorama | `serie_temporal.py` (lista; recibe el nivel de detalle de la barra lateral) |
+  | Mercados | `regiones.py`, `paises.py` |
+  | Ingreso | `vias_fronteras.py`, `estacionalidad.py`, `tipo_visitante.py` (acomodadas por `src/pestanas/ingreso.py`) |
+  | Pronóstico | `pronostico_real.py`, `error_modelos.py` |
+
+- **Pestaña Ingreso:** su distribución y sus indicadores están en `src/pestanas/ingreso.py`, que recibe
+  las gráficas marcadas en "Mostrar". Para agregar una gráfica a Ingreso, registrarla en su `GRAFICAS`.
+
+- **`df` ya viene filtrado** por año, vía y tipo de visitante (en Pronóstico llega la base completa).
+  Si queda vacío, mostrar `st.info("No hay datos para esta selección.")`.
+- **Valores de la barra lateral en `st.session_state`:** `"detalle"` (`"Anual"` o `"Mensual"`); en
+  Pronóstico, `"pronostico_serie"`, `"pronostico_modelo"` y `"pronostico_comparar"` (bool).
+- **Gráficas enlazadas:** se comunican por `st.session_state`: `"region_seleccionada"` (regiones a
+  países), `"via_seleccionada"` (vías a fronteras) y `"periodo_seleccionado"` (V1, `(inicio, fin)` o `None`).
+- **Datos de modelos** en `data/processed/`, con los nombres de `SERIES_MODELO` y `MODELOS` de
+  `src/datos.py`:
+  - `predicciones.parquet`: `serie, modelo, fecha, real, prediccion, conjunto` (`"entrenamiento"` o `"prueba"`).
+  - `metricas.parquet`: `serie, modelo, mae, rmse`.
+  Los modelos se calculan una vez y se suben los parquet; Prophet no va en `requirements.txt`.
 - **Colores:** nunca escribir un hex dentro de una gráfica; usar `src/paleta.py`
-  (`paleta.color_para("region", valor)`), para que cada categoría tenga el mismo color en todo el tablero.
-- **Gráficas enlazadas:** la visualización 1 guarda el periodo seleccionado por el usuario en
-  `st.session_state["periodo_seleccionado"]` como `(inicio, fin)` o `None`. Las demás gráficas pueden
-  leerlo para filtrarse (ver `src/viz/viz2.py`).
-- Si una selección deja la gráfica sin datos, mostrar `st.info(...)` con un mensaje claro.
+  (`paleta.color_para("region", valor)`, `paleta.OBSERVADO`, `paleta.PREDICCION`,
+  `paleta.ESCALA_SECUENCIAL`). La fuente Inter y los colores por defecto de las gráficas ya vienen del
+  tema en `.streamlit/config.toml`; usar `st.plotly_chart` con el tema por defecto (sin `theme=None`).
+- Cada gráfica lleva un `st.subheader` con la pregunta que responde y un `st.caption` corto que explica
+  qué muestra y para qué sirve.
 
 ## Justificación de la herramienta: Streamlit + Plotly (Python)
 

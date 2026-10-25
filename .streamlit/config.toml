@@ -1,8 +1,11 @@
 # Colores base del tema (los mismos de src/paleta.py)
 [theme]
 base = "light"
-primaryColor = "#1B6F98"
-backgroundColor = "#FEF9FF"
-secondaryBackgroundColor = "#F3EEF4"
+primaryColor = "#1689C4"
+backgroundColor = "#FAFAFA"
+secondaryBackgroundColor = "#F2F2F3"
 textColor = "#2E2F2F"
-font = "sans serif"
+font = "Inter:https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+# Colores que Streamlit aplica a las gráficas de Plotly (categórica accesible y escala azul de 10 pasos)
+chartCategoricalColors = ["#1689C4", "#E8871E", "#009E73", "#CC79A7", "#6A4C93", "#117733"]
+chartSequentialColors = ["#E3F4FD", "#C3E9FA", "#A3DEF8", "#84D6F8", "#65CFF9", "#48BCED", "#2B9FD6", "#1584BD", "#1070A2", "#0B5C86"]
