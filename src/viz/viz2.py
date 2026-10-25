@@ -1,13 +1,8 @@
 """
-Visualización 2 – (Persona 4)
+Visualización 2 – Mercados de origen.
 
-Para enlazarla con la visualización 1, leer el periodo elegido por el usuario:
-
-    periodo = st.session_state.get(serie_temporal.CLAVE_PERIODO)  # (inicio, fin) o None
-    if periodo:
-        df = df[df["fecha"].between(*periodo)]
-
-Usar los colores de src/paleta.py (p. ej. paleta.color_para("region", valor)).
+Recibe el periodo elegido en la visualización 1 desde
+st.session_state[CLAVE_PERIODO] como (inicio, fin), o None si no hay selección.
 """
 import pandas as pd
 import streamlit as st

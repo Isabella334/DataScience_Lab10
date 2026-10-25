@@ -2,8 +2,7 @@
 Limpieza base del dataset de ingreso de viajeros (Lab 1).
 
 Lee el Excel original del Lab 1 y genera data/processed/viajeros.parquet con nombres de
-columna sin tildes ni espacios. La Persona 4 puede ampliar esta limpieza; la app
-solo depende de las columnas listadas en COLUMNAS.
+columna sin tildes ni espacios. La app usa las columnas listadas en COLUMNAS.
 
 Uso:  python data/procesar_datos.py
 """

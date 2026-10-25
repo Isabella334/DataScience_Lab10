@@ -2,6 +2,7 @@ import streamlit as st
 
 from src import paleta
 from src.datos import VISITANTES, aplicar_filtros, cargar_datos, formato_num
+from src.pestanas import ingreso
 from src.viz import serie_temporal, viz2
 
 st.set_page_config(
@@ -63,7 +64,7 @@ k3.metric("Puntos de ingreso", f"{datos['frontera'].nunique():,}")
 k4.metric("Último mes con datos", f"{df['fecha'].max():%b %Y}")
 
 # Navegación
-# Pestañas alineadas con las preguntas de gestión (P1–P6) del documento de alcance
+# Cada pestaña responde a una o más preguntas de gestión (P1–P6)
 tab_explorar, tab_origen, tab_modelos, tab_acerca = st.tabs(
     ["📈 Evolución y origen", "🛂 Vías, temporada y tipo de visitante", "🔮 Predicciones y modelos",
      "ℹ️ Acerca del tablero"]
@@ -75,7 +76,7 @@ with tab_explorar:
     viz2.render(datos)  # P2
 
 with tab_origen:
-    st.info("Sección en construcción: vías y fronteras (P3), estacionalidad (P4) y tipo de visitante (P5).")
+    ingreso.render(datos)  # P3, P4 y P5
 
 with tab_modelos:
     st.info(

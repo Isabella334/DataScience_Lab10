@@ -21,18 +21,21 @@ data/
   processed/               # viajeros.parquet (datos limpios que usa la app)
   procesar_datos.py        # limpieza: Excel -> parquet
 src/
-  paleta.py                # ÚNICA fuente de colores (Persona 2 actualiza los hex aquí)
+  paleta.py                # colores del tablero y su significado
   datos.py                 # carga en caché, filtros globales, formato de números
+  pestanas/
+    ingreso.py             # pestaña Ingreso: indicadores y distribución de sus gráficas
   viz/
-    serie_temporal.py      # Visualización 1 – evolución de llegadas (Persona 3)
-    viz2.py                # Visualización 2 (Persona 4)
-docs/                      # documento de diseño y material del avance
+    serie_temporal.py      # evolución de visitantes (P1)
+    viz2.py                # mercados de origen (P2)
+    vias_fronteras.py      # vías de ingreso y ranking de fronteras, enlazadas (P3)
+    estacionalidad.py      # mapa de calor año × mes (P4)
 ```
 
-### Convenciones para el equipo
+### Convenciones del código
 
 - **Cada visualización es un módulo en `src/viz/`** con una función `render(df)`; `app.py` solo la llama
-  dentro de la pestaña correspondiente. Así cada quien trabaja en su archivo sin conflictos.
+  dentro de la pestaña correspondiente.
 - **Colores:** nunca escribir un hex dentro de una gráfica; usar `src/paleta.py`
   (`paleta.color_para("region", valor)`), para que cada categoría tenga el mismo color en todo el tablero.
 - **Gráficas enlazadas:** la visualización 1 guarda el periodo seleccionado por el usuario en

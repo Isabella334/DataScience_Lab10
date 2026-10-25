@@ -20,8 +20,17 @@ from src import paleta
 from src.datos import ETIQUETAS, formato_num
 
 FRECUENCIAS = {"Mes": "MS", "Trimestre": "QS", "Año": "YS"}
+# Nombres que usa la barra lateral -> nombres internos
+ALIAS_FRECUENCIA = {"Anual": "Año", "Mensual": "Mes", "Trimestral": "Trimestre"}
 CLAVE_PERIODO = "periodo_seleccionado"
 MAX_CATEGORIAS = 7  # el resto se agrupa en "Otros" para no saturar la gráfica
+# Tramos de la fuente según la hoja "Notas" del Excel: 2009–2020 respaldos históricos,
+# 2021–2022 entrega del IGM y desde 2023 conteos depurados del INGUAT
+CAMBIOS_FUENTE = [
+    ("2021-01-01", "Fuente: IGM", "Desde 2021 los datos provienen de la entrega del IGM.", 0.14),
+    ("2023-01-01", "Fuente: INGUAT",
+     "Desde 2023 se usan los conteos depurados del INGUAT y cambia la definición de «Viajero».", 0.02),
+]
 
 
 def _agregar(df: pd.DataFrame, frecuencia: str, desglose: str) -> pd.DataFrame:
@@ -76,12 +85,19 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
         annotation_text="Cierre de fronteras / COVID-19", annotation_position="top left",
         annotation_font=dict(size=11, color=paleta.TEXTO_SUAVE),
     )
+    # Cambios metodológicos de la fuente (Honey Bronze = advertencia), para no leerlos como caídas reales
+    for fecha, texto, detalle, altura in CAMBIOS_FUENTE:
+        fig.add_shape(type="line", x0=fecha, x1=fecha, y0=0, y1=1, yref="paper",
+                      line=dict(color=paleta.REFERENCIA, width=1.5, dash="dot"))
+        fig.add_annotation(x=fecha, y=altura, yref="paper", text=texto, hovertext=detalle,
+                           showarrow=False, xanchor="left", yanchor="bottom", xshift=4,
+                           font=dict(size=10, color=paleta.TEXTO_SUAVE), bgcolor=paleta.FONDO)
     # Referencia prepandemia (P1): nivel de 2019 en la vista anual del total
     if frecuencia == "Año" and desglose == "total":
         nivel_2019 = serie.loc[serie["fecha"].dt.year == 2019, "viajeros"].sum()
         if nivel_2019:
             fig.add_hline(
-                y=nivel_2019, line_dash="dash", line_color=paleta.REFERENCIA, line_width=1.5,
+                y=nivel_2019, line_dash="dash", line_color=paleta.TEXTO_SUAVE, line_width=1.5,
                 annotation_text="Nivel 2019 (prepandemia)", annotation_position="bottom left",
                 annotation_font=dict(size=11, color=paleta.TEXTO_SUAVE),
             )
@@ -126,8 +142,12 @@ def _leer_seleccion(evento, frecuencia: str):
     return None
 
 
-def render(df: pd.DataFrame) -> None:
-    st.subheader("1. ¿Cómo ha evolucionado la llegada de visitantes y cuánto nos hemos recuperado respecto a 2019?")
+def render(df: pd.DataFrame, frecuencia: str | None = None) -> None:
+    """
+    frecuencia: nivel de detalle elegido en la barra lateral ("Anual"/"Mensual", o
+    "Año"/"Trimestre"/"Mes"). Si no se pasa, la gráfica muestra su propio selector.
+    """
+    st.subheader("¿Cómo ha evolucionado la llegada de visitantes y cuánto nos hemos recuperado respecto a 2019?")
     st.caption(
         "Cantidad de visitantes internacionales que ingresaron a Guatemala en cada periodo. "
         "Cambie el nivel de detalle o el desglose, y **arrastre sobre la gráfica (o haga clic en un punto)** "
@@ -135,7 +155,14 @@ def render(df: pd.DataFrame) -> None:
     )
 
     c1, c2, c3 = st.columns([1, 1.3, 1.3])
-    frecuencia = c1.radio("Nivel de detalle", list(FRECUENCIAS), index=2, horizontal=True, key="v1_frec")
+    if frecuencia is None:
+        frecuencia = c1.radio("Nivel de detalle", list(FRECUENCIAS), index=2, horizontal=True, key="v1_frec")
+    else:
+        frecuencia = ALIAS_FRECUENCIA.get(frecuencia, frecuencia)
+        if frecuencia not in FRECUENCIAS:
+            raise ValueError(f"Nivel de detalle no reconocido: {frecuencia!r}")
+        c1.markdown(f"**Nivel de detalle:** {frecuencia.lower()}  \n"
+                    "<small>Se cambia en la barra lateral.</small>", unsafe_allow_html=True)
     desglose = c2.selectbox(
         "Desglosar por", ["total", "region", "via", "tipo_viajero"],
         format_func=ETIQUETAS.get, key="v1_desglose",
@@ -152,7 +179,7 @@ def render(df: pd.DataFrame) -> None:
     serie = _agregar(df, frecuencia, desglose)
     fig = _construir_figura(serie, desglose, vista, frecuencia)
     evento = st.plotly_chart(
-        fig, use_container_width=True, on_select="rerun",
+        fig, width="stretch", on_select="rerun",
         selection_mode=("points", "box"), key="v1_grafica",
         config={"displaylogo": False, "locale": "es"},
     )
@@ -185,3 +212,7 @@ def render(df: pd.DataFrame) -> None:
                 help="Visitantes de 2025 como porcentaje de los de 2019 (último año completo antes de la pandemia).",
             )
     st.caption(f"🔎 {etiqueta}. " + ("Haga doble clic en la gráfica para quitar la selección." if seleccion else ""))
+    st.caption(
+        "Las líneas punteadas marcan cambios en la fuente de datos (2021 y 2023): los saltos cerca de "
+        "esas fechas pueden deberse a la forma de contar y no necesariamente a cambios reales en la llegada."
+    )

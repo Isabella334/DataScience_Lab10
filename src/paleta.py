@@ -1,12 +1,12 @@
 """
 Paleta de colores del tablero (fuente única de verdad).
 
-Paleta base definida por la Persona 2 (Coolors):
+Paleta base:
     Ghost White  #FEF9FF   fondo
-    Graphite     #2E2F2F   texto y datos observados
-    Sky Aqua     #56CBF9   acento frío: predicciones, vía aérea
-    Honey Bronze #EDB458   acento cálido suave: referencias (p. ej. nivel 2019)
-    Amber Earth  #E8871E   acento cálido fuerte: selección / resaltado
+    Graphite     #2E2F2F   texto, ejes e íconos
+    Sky Aqua     #56CBF9   color primario: datos observados
+    Honey Bronze #EDB458   advertencias y datos preliminares
+    Amber Earth  #E8871E   acento: predicciones y selección
 
 Azul vs. naranja es el par de contraste más seguro para daltonismo (protanopia y
 deuteranopia los siguen distinguiendo). Los dos tonos cálidos se diferencian por
@@ -16,11 +16,11 @@ Sky Aqua sobre el fondo claro tiene poco contraste (~1.8:1), así que para texto
 líneas finas se usa un tono oscuro del mismo matiz (AQUA_OSCURO, 5.3:1, cumple WCAG AA). Los tonos
 derivados son variaciones de luminosidad de los 5 colores base, no colores nuevos.
 
-Regla de significado: cada categoría conserva su color en TODAS las gráficas.
-Para cambiar la paleta, editar SOLO este archivo y .streamlit/config.toml.
+Cada color y cada categoría conservan su significado en todas las gráficas.
+Los colores del tema de Streamlit están en .streamlit/config.toml.
 """
 
-# Colores base (Persona 2)
+# Colores base
 GHOST_WHITE = "#FEF9FF"
 GRAPHITE = "#2E2F2F"
 SKY_AQUA = "#56CBF9"
@@ -87,3 +87,12 @@ MAPAS_COLOR = {
 def color_para(columna: str, valor: str, i: int = 0) -> str:
     """Color fijo de una categoría; si no está mapeada usa la secuencia categórica."""
     return MAPAS_COLOR.get(columna, {}).get(valor, _CATEGORICA[i % len(_CATEGORICA)])
+
+# Escala secuencial de un solo matiz (mapas de calor): de claro a Aqua oscuro.
+# Se lee por luminosidad, así que funciona también con daltonismo.
+ESCALA_SECUENCIAL = [
+    [0.0, "#F4FBFE"],
+    [0.35, AQUA_CLARO],
+    [0.65, SKY_AQUA],
+    [1.0, AQUA_OSCURO],
+]

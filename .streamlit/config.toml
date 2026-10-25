@@ -1,4 +1,4 @@
-# Colores base (mantener sincronizados con src/paleta.py)
+# Colores base del tema (los mismos de src/paleta.py)
 [theme]
 base = "light"
 primaryColor = "#1B6F98"
