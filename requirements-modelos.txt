@@ -1,0 +1,6 @@
+# Solo para recalcular los modelos (python data/entrenar_modelos.py); la app no los necesita.
+pandas>=2.2
+pyarrow>=15
+openpyxl>=3.1
+statsmodels>=0.14
+prophet>=1.1.5

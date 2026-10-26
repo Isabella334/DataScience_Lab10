@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .venv/
 venv/
+.venv-modelos/
 .ipynb_checkpoints/
 .DS_Store
 .streamlit/secrets.toml
