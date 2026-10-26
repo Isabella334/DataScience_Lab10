@@ -17,6 +17,19 @@ streamlit run app.py
 La app se abre en http://localhost:8501. Si falta `data/processed/viajeros.parquet`, la app lo genera
 sola desde el Excel (o se puede generar con `python data/procesar_datos.py`).
 
+### Recalcular los modelos (solo si cambian los datos)
+
+`predicciones.parquet` y `metricas.parquet` ya están en el repositorio, así que la app no necesita
+Prophet. Para volver a calcularlos se usa un entorno aparte con Python 3.13 o anterior (Prophet aún no
+es estable en 3.14):
+
+```bash
+py -3.13 -m venv .venv-modelos                   # en Mac/Linux: python3.13 -m venv .venv-modelos
+.venv-modelos\Scripts\activate                   # en Mac/Linux: source .venv-modelos/bin/activate
+pip install -r requirements-modelos.txt
+python data/entrenar_modelos.py                  # tarda ~1 minuto: 7 series × 5 modelos
+```
+
 ## Estructura
 
 ```
@@ -26,6 +39,7 @@ data/
   raw/                     # Excel original del Lab 1
   processed/               # viajeros.parquet (+ predicciones.parquet y metricas.parquet de los modelos)
   procesar_datos.py        # limpieza: Excel -> parquet
+  entrenar_modelos.py      # 5 modelos del Lab 1 en 7 series -> predicciones.parquet y metricas.parquet
 src/
   paleta.py                # ÚNICA fuente de colores del tablero y su significado
   datos.py                 # carga en caché, filtros, constantes de series y modelos, formato
@@ -35,6 +49,9 @@ src/
     serie_temporal.py      # evolución de visitantes (P1)
     vias_fronteras.py      # vías de ingreso y ranking de fronteras, enlazadas (P3)
     estacionalidad.py      # mapa de calor año × mes (P4)
+    tipo_visitante.py      # tipo de visitante por vía (P5)
+    pronostico_real.py     # pronóstico frente a lo real, enlazada con error_modelos.py
+    error_modelos.py       # MAE/RMSE por modelo (serie elegida o matriz de todas las series)
 ```
 
 ### Convenciones del código
@@ -58,7 +75,9 @@ src/
 - **Valores de la barra lateral en `st.session_state`:** `"detalle"` (`"Anual"` o `"Mensual"`); en
   Pronóstico, `"pronostico_serie"`, `"pronostico_modelo"` y `"pronostico_comparar"` (bool).
 - **Gráficas enlazadas:** se comunican por `st.session_state`: `"region_seleccionada"` (regiones a
-  países), `"via_seleccionada"` (vías a fronteras) y `"periodo_seleccionado"` (V1, `(inicio, fin)` o `None`).
+  países), `"via_seleccionada"` (vías a fronteras), `"periodo_seleccionado"` (V1, `(inicio, fin)` o `None`)
+  y, en Pronóstico, un clic en el error de un modelo cambia `"pronostico_modelo"` (y `"pronostico_serie"`
+  desde la matriz), que también actualiza la barra lateral.
 - **Datos de modelos** en `data/processed/`, con los nombres de `SERIES_MODELO` y `MODELOS` de
   `src/datos.py`:
   - `predicciones.parquet`: `serie, modelo, fecha, real, prediccion, conjunto` (`"entrenamiento"` o `"prueba"`).
