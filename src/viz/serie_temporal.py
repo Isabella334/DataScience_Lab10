@@ -8,9 +8,8 @@ Interacción:
 - Nivel de detalle temporal: mes / trimestre / año (aumentar o disminuir detalle).
 - Desglose: total, región, vía o tipo de viajero.
 - Vista: líneas (comparar tendencias) o área apilada (ver composición).
-- Selección: clic o arrastre en la gráfica para elegir un periodo. El periodo se
-  guarda en st.session_state["periodo_seleccionado"] para que la visualización 2
-  pueda filtrarse con él (gráficas enlazadas).
+- Selección: clic o arrastre en la gráfica para elegir un periodo. Las cifras de abajo
+  se calculan para ese periodo y se guarda en st.session_state["periodo_seleccionado"].
 """
 import pandas as pd
 import plotly.graph_objects as go
@@ -151,7 +150,7 @@ def render(df: pd.DataFrame, frecuencia: str | None = None) -> None:
     st.caption(
         "Cantidad de visitantes internacionales que ingresaron a Guatemala en cada periodo. "
         "Cambie el nivel de detalle o el desglose, y **arrastre sobre la gráfica (o haga clic en un punto)** "
-        "para seleccionar un periodo: las demás gráficas se actualizarán con esa selección."
+        "para seleccionar un periodo: las cifras de abajo se calcularán solo para ese periodo."
     )
 
     c1, c2, c3 = st.columns([1, 1.3, 1.3])

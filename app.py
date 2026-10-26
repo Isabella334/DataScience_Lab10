@@ -197,6 +197,8 @@ def panorama() -> None:
 
 def mercados() -> None:
     st.caption("De qué regiones y países vienen los visitantes. Haga clic en una región para ver sus países.")
+    if not st.session_state.get("mostrar_regiones", True):
+        st.session_state["region_seleccionada"] = None  # sin la gráfica de regiones, países muestra todas
     _graficas("Mercados", datos)
 
 

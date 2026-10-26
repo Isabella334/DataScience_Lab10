@@ -47,6 +47,7 @@ src/
     ingreso.py             # pestaña Ingreso: indicadores y distribución de sus gráficas
   viz/                     # un archivo por gráfica (ver tabla abajo)
     serie_temporal.py      # evolución de visitantes (P1)
+    mercados.py            # regiones y ranking de países, enlazadas (P2; regiones.py y paises.py la exponen)
     vias_fronteras.py      # vías de ingreso y ranking de fronteras, enlazadas (P3)
     estacionalidad.py      # mapa de calor año × mes (P4)
     tipo_visitante.py      # tipo de visitante por vía (P5)
@@ -63,7 +64,7 @@ src/
   | Pestaña | Archivo en `src/viz/` |
   |---|---|
   | Panorama | `serie_temporal.py` (lista; recibe el nivel de detalle de la barra lateral) |
-  | Mercados | `regiones.py`, `paises.py` |
+  | Mercados | `regiones.py`, `paises.py` (la lógica de ambas está en `mercados.py`) |
   | Ingreso | `vias_fronteras.py`, `estacionalidad.py`, `tipo_visitante.py` (acomodadas por `src/pestanas/ingreso.py`) |
   | Pronóstico | `pronostico_real.py`, `error_modelos.py` |
 
@@ -116,5 +117,5 @@ el script en cada interacción— se mitiga con `st.cache_data` y con datos en f
 - **Tipo de gráfica:** serie de tiempo (líneas), porque la variable principal es un conteo ordenado en el
   tiempo y lo que interesa es la tendencia, la estacionalidad y las rupturas (p. ej. 2020). Con desglose,
   se puede cambiar a área apilada para ver la composición del total.
-- **Interacción:** nivel de detalle mes/trimestre/año, desglose por región/vía/tipo de viajero,
-  rangeslider para hacer zoom en el tiempo y selección por arrastre o clic que filtra la visualización 2.
+- **Interacción:** nivel de detalle anual/mensual (barra lateral), desglose por región/vía/tipo de viajero,
+  rangeslider para hacer zoom en el tiempo y selección por arrastre o clic que calcula las cifras de ese periodo.
