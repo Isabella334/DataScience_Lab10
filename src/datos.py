@@ -50,6 +50,12 @@ def cargar_metricas() -> pd.DataFrame | None:
     return pd.read_parquet(METRICAS) if METRICAS.exists() else None
 
 
+@st.cache_data
+def cargar_predicciones() -> pd.DataFrame | None:
+    """Predicciones de los modelos (serie, modelo, fecha, real, prediccion, conjunto) o None si no existen."""
+    return pd.read_parquet(PREDICCIONES) if PREDICCIONES.exists() else None
+
+
 def aplicar_filtros(df: pd.DataFrame, filtros: dict) -> pd.DataFrame:
     """Aplica los filtros de la barra lateral. Una lista vacía deja la selección sin datos."""
     anio_ini, anio_fin = filtros["anios"]
