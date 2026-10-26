@@ -55,7 +55,7 @@ def _figura(tabla: pd.DataFrame, medida: str) -> go.Figure:
     ))
     fig.update_layout(
         height=max(340, 22 * len(tabla) + 70), margin=dict(l=10, r=10, t=10, b=10),
-        plot_bgcolor=paleta.FONDO, paper_bgcolor=paleta.FONDO,
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color=paleta.TEXTO, size=13),
         xaxis=dict(side="top", title=None), yaxis=dict(title=None, autorange="reversed", dtick=1),
     )

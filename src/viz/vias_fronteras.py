@@ -31,6 +31,18 @@ def _via_desde_estado() -> str | None:
     return puntos[0]["customdata"][0] if puntos else None
 
 
+MAX_CARACTERES = 18  # nombres más largos se acortan en el eje; el tooltip muestra el nombre completo
+
+
+def _acortar(nombre: str) -> str:
+    return nombre if len(nombre) <= MAX_CARACTERES else nombre[:MAX_CARACTERES - 1].rstrip() + "…"
+
+
+def _margen_etiquetas(etiquetas: pd.Series) -> int:
+    """Margen izquierdo (px) para que el nombre más largo del eje no se corte."""
+    return 10 + 7 * max((len(_acortar(str(e))) for e in etiquetas), default=0)
+
+
 def _figura_vias(por_via: pd.DataFrame, elegida: str | None) -> go.Figure:
     # Azul = dato observado, ámbar = selección del usuario, gris = no seleccionado
     if elegida is None:
@@ -41,13 +53,13 @@ def _figura_vias(por_via: pd.DataFrame, elegida: str | None) -> go.Figure:
         x=por_via["viajeros"], y=por_via["via"], orientation="h",
         marker_color=colores,
         customdata=por_via[["via", "porcentaje"]],
-        text=[f"{formato_num(v)}  ({p:.1%})" for v, p in zip(por_via["viajeros"], por_via["porcentaje"])],
+        text=[f"{formato_num(v)} · {p:.0%}" for v, p in zip(por_via["viajeros"], por_via["porcentaje"])],
         textposition="outside", cliponaxis=False,
         hovertemplate="<b>%{y}</b><br>%{x:,.0f} visitantes<br>%{customdata[1]:.1%} del total<extra></extra>",
     ))
     fig.update_layout(
-        height=380, margin=dict(l=10, r=90, t=10, b=10),
-        plot_bgcolor=paleta.FONDO, paper_bgcolor=paleta.FONDO,
+        height=380, margin=dict(l=_margen_etiquetas(por_via["via"]), r=100, t=10, b=10),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color=paleta.TEXTO, size=13), showlegend=False,
         xaxis=dict(visible=False), yaxis=dict(title=None, autorange="reversed"),
         clickmode="event+select", dragmode=False,
@@ -57,19 +69,20 @@ def _figura_vias(por_via: pd.DataFrame, elegida: str | None) -> go.Figure:
 
 def _figura_fronteras(ranking: pd.DataFrame) -> go.Figure:
     fig = go.Figure(go.Bar(
-        x=ranking["viajeros"], y=ranking["frontera"], orientation="h",
+        x=ranking["viajeros"], y=ranking["frontera"].astype(str).map(_acortar), orientation="h",
         marker_color=paleta.PRIMARIO,  # datos observados
-        customdata=ranking[["via", "porcentaje"]],
+        customdata=ranking[["via", "porcentaje", "frontera"]],
         text=[formato_num(v) for v in ranking["viajeros"]],
         textposition="outside", cliponaxis=False,
         hovertemplate=(
-            "<b>%{y}</b> (%{customdata[0]})<br>%{x:,.0f} visitantes<br>"
+            "<b>%{customdata[2]}</b> (%{customdata[0]})<br>%{x:,.0f} visitantes<br>"
             "%{customdata[1]:.1%} de la selección<extra></extra>"
         ),
     ))
     fig.update_layout(
-        height=max(380, 34 * len(ranking) + 40), margin=dict(l=10, r=70, t=10, b=10),
-        plot_bgcolor=paleta.FONDO, paper_bgcolor=paleta.FONDO,
+        height=max(380, 34 * len(ranking) + 40),
+        margin=dict(l=_margen_etiquetas(ranking["frontera"]), r=70, t=10, b=10),
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color=paleta.TEXTO, size=13), showlegend=False,
         xaxis=dict(visible=False), yaxis=dict(title=None, autorange="reversed"),
     )

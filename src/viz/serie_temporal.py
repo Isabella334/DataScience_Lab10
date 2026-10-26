@@ -16,7 +16,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 from src import paleta
-from src.datos import ETIQUETAS, formato_num
+from src.datos import ETIQUETAS, formato_num, mes_es
 
 FRECUENCIAS = {"Mes": "MS", "Trimestre": "QS", "Año": "YS"}
 # Nombres que usa la barra lateral -> nombres internos
@@ -114,7 +114,7 @@ def _construir_figura(serie: pd.DataFrame, desglose: str, vista: str, frecuencia
         margin=dict(l=10, r=10, t=70, b=10),
         hovermode="x unified" if desglose != "total" else "closest",
         legend=dict(orientation="h", yanchor="bottom", y=1.08, x=0, title=None),
-        plot_bgcolor=paleta.FONDO, paper_bgcolor=paleta.FONDO,
+        plot_bgcolor="rgba(0,0,0,0)", paper_bgcolor="rgba(0,0,0,0)",
         font=dict(color=paleta.TEXTO, size=13),
         dragmode="select",
         xaxis=dict(title=None, gridcolor=paleta.REJILLA, rangeslider=dict(visible=True, thickness=0.06)),
@@ -190,26 +190,21 @@ def render(df: pd.DataFrame, frecuencia: str | None = None) -> None:
     if seleccion:
         ini, fin = seleccion
         sub = df[df["fecha"].between(ini, fin)]
-        etiqueta = f"Periodo seleccionado: {ini:%b %Y} – {fin:%b %Y}"
+        etiqueta = f"Periodo seleccionado: {mes_es(ini)} – {mes_es(fin)}"
     else:
         sub = df
-        etiqueta = f"Periodo completo filtrado: {df['fecha'].min():%b %Y} – {df['fecha'].max():%b %Y}"
+        etiqueta = f"Periodo completo filtrado: {mes_es(df['fecha'].min())} – {mes_es(df['fecha'].max())}"
 
     total_total = sub["viajeros"].sum()
-    k1, k2, k3 = st.columns(3)
-    k1.metric("Visitantes en el periodo", formato_num(total_total))
+    # La recuperación frente a 2019 ya está en los indicadores de la pestaña
+    con_lider = desglose != "total" and not sub.empty
+    columnas = st.columns(3 if con_lider else 2)
+    columnas[0].metric("Visitantes en el periodo", formato_num(total_total))
     meses = sub["fecha"].nunique()
-    k2.metric("Promedio mensual", formato_num(total_total / meses) if meses else "—")
-    if desglose != "total" and not sub.empty:
+    columnas[1].metric("Promedio mensual", formato_num(total_total / meses) if meses else "—")
+    if con_lider:
         lider = sub.groupby(desglose, observed=True)["viajeros"].sum().idxmax()
-        k3.metric(f"{ETIQUETAS[desglose]} con más visitantes", str(lider))
-    else:
-        anual = df.groupby("anio")["viajeros"].sum()
-        if anual.get(2019) and anual.get(2025):
-            k3.metric(
-                "Recuperación 2025 vs. 2019", f"{anual[2025] / anual[2019]:.0%}",
-                help="Visitantes de 2025 como porcentaje de los de 2019 (último año completo antes de la pandemia).",
-            )
+        columnas[2].metric(f"{ETIQUETAS[desglose]} con más visitantes", str(lider))
     st.caption(f"🔎 {etiqueta}. " + ("Haga doble clic en la gráfica para quitar la selección." if seleccion else ""))
     st.caption(
         "Las líneas punteadas marcan cambios en la fuente de datos (2021 y 2023): los saltos cerca de "

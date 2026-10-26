@@ -37,32 +37,32 @@ def _tipo_visitante(df: pd.DataFrame) -> None:
 
 
 def _kpis(df: pd.DataFrame) -> None:
-    k1, k2, k3, k4 = st.columns(4)
-    if df.empty:
-        for k, titulo in zip((k1, k2, k3, k4), ("Ingreso terrestre", "Ingreso aéreo",
-                                                "Principal punto de ingreso", "Mes de mayor demanda")):
-            k.metric(titulo, "—")
-        return
+    terrestre = aerea = lider = mes = "—"
+    ayuda_lider = "Frontera, aeropuerto o puerto con más visitantes en el periodo filtrado."
+    if not df.empty:
+        total = df["viajeros"].sum()
+        por_via = df.groupby("via", observed=True)["viajeros"].sum()
+        terrestre = f"{por_via.get('Terrestre', 0) / total:.0%}"
+        aerea = f"{por_via.get('Aérea', 0) / total:.0%}"
+        fronteras = df.groupby("frontera", observed=True)["viajeros"].sum()
+        lider = str(fronteras.idxmax())
+        ayuda_lider = f"{formato_num(fronteras.max())} visitantes ({fronteras.max() / total:.0%} del total filtrado)."
+        pct = estacionalidad.participacion_mensual(df)
+        if pct is not None:
+            mes = f"{estacionalidad.MESES[pct.idxmax() - 1]} · {pct.max():.1%}"
 
-    total = df["viajeros"].sum()
-    por_via = df.groupby("via", observed=True)["viajeros"].sum()
-    k1.metric("Ingreso terrestre", f"{por_via.get('Terrestre', 0) / total:.0%}",
-              help="Porcentaje de los visitantes del periodo filtrado que entraron por tierra.")
-    k2.metric("Ingreso aéreo", f"{por_via.get('Aérea', 0) / total:.0%}",
-              help="Porcentaje de los visitantes del periodo filtrado que entraron por avión.")
-
-    fronteras = df.groupby("frontera", observed=True)["viajeros"].sum()
-    lider = fronteras.idxmax()
-    k3.metric("Principal punto de ingreso", str(lider),
-              help=f"{formato_num(fronteras[lider])} visitantes ({fronteras[lider] / total:.0%} del total filtrado).")
-
-    pct = estacionalidad.participacion_mensual(df)
-    if pct is None:
-        k4.metric("Mes de mayor demanda", "—", help="Se necesita al menos un año completo y típico.")
-    else:
-        mes = pct.idxmax()
-        k4.metric("Mes de mayor demanda", f"{estacionalidad.MESES[mes - 1]} · {pct[mes]:.1%}",
-                  help="Mes que en promedio concentra más visitantes del año (años completos, sin 2020–2021).")
+    indicadores = [
+        ("Ingreso terrestre", terrestre, "Porcentaje de los visitantes del periodo filtrado que entraron por tierra."),
+        ("Ingreso aéreo", aerea, "Porcentaje de los visitantes del periodo filtrado que entraron por avión."),
+        ("Principal punto de ingreso", lider, ayuda_lider),
+        ("Mes de mayor demanda", mes,
+         "Mes que en promedio concentra más visitantes del año (años completos, sin 2020–2021)."),
+    ]
+    # Mismas tarjetas que los indicadores de Panorama (estilo definido en app.py)
+    with st.container(horizontal=True, gap="medium"):
+        for i, (etiqueta, valor, ayuda) in enumerate(indicadores):
+            with st.container(key=f"tarjeta_kpi_ingreso_{i}", height="stretch"):
+                st.metric(etiqueta, valor, help=ayuda)
 
 
 def render(df: pd.DataFrame, mostrar: set[str] | None = None) -> None:
@@ -71,11 +71,11 @@ def render(df: pd.DataFrame, mostrar: set[str] | None = None) -> None:
     _kpis(df)
 
     if not mostrar & set(GRAFICAS):
-        st.info("No hay gráficas seleccionadas. Elija al menos una en «Mostrar» de la barra lateral.")
+        st.info("Todas las gráficas de esta pestaña están ocultas. Actívelas en «Mostrar», en la barra lateral.")
         return
 
     if "estacionalidad" in mostrar:
-        with st.container(border=True):
+        with st.container(key="tarjeta_estacionalidad"):
             estacionalidad.render(df, resumen=False)
 
     if "vias" not in mostrar:
@@ -83,14 +83,14 @@ def render(df: pd.DataFrame, mostrar: set[str] | None = None) -> None:
 
     abajo = [g for g in ("vias", "fronteras") if g in mostrar]
     if abajo:
-        columnas = st.columns(len(abajo), gap="medium")
+        columnas = st.columns(len(abajo), gap="large")
         for col, grafica in zip(columnas, abajo):
-            with col, st.container(border=True):
+            with col, st.container(key=f"tarjeta_{grafica}"):
                 if grafica == "vias":
                     vias_fronteras.render_vias(df)
                 else:
                     vias_fronteras.render_fronteras(df)
 
     if "tipo_visitante" in mostrar:
-        with st.container(border=True):
+        with st.container(key="tarjeta_tipo_visitante"):
             _tipo_visitante(df)
